@@ -1,47 +1,42 @@
 package service
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 var (
-	ErrInternalFailure = errors.New("internal failure")
-	ErrNotFound        = errors.New("not found")
-	ErrBadRequest      = errors.New("bad request")
+	ErrNotFound   = errors.New("not found")
+	ErrBadRequest = errors.New("bad request")
 )
 
 type ServiceError struct {
-	Code     int
-	appError error
-	svcError error
+	svcErr error
+	appErr error
+	code   int
 }
 
-func (e ServiceError) Error() string {
-	return e.svcError.Error()
+func (e *ServiceError) Error() string {
+	return fmt.Sprintf("svcErr: %v,  code: %d", e.svcErr, e.code)
 }
 
-func NewError(code int, svcError error, appError error) *ServiceError {
+func (e *ServiceError) AppErr() error {
+	return e.appErr
+}
+
+func (e *ServiceError) SvcErr() error {
+	return e.svcErr
+}
+
+func NewServiceError(svcErr error, appErr error, code int) *ServiceError {
 	return &ServiceError{
-		Code:     code,
-		svcError: svcError,
-		appError: appError,
+		svcErr: svcErr,
+		appErr: appErr,
+		code:   code,
 	}
 }
 
-func (e ServiceError) AppError() error {
-	return e.appError
-}
-
-func (e ServiceError) SVCError() error {
-	return e.svcError
-}
-
-func NewBadRequest(svcError error, appError error) *ServiceError {
-	return NewError(400001, svcError, appError)
-}
-
-func NewNotFound(svcError error, appError error) *ServiceError {
-	return NewError(50001, svcError, appError)
-}
-
-func NewInternalError(svcError error, appError error) *ServiceError {
-	return NewError(60001, svcError, appError)
+func NewNotFoundErr(appErr error) *ServiceError {
+	return NewServiceError(ErrNotFound, appErr, http.StatusBadRequest)
 }

@@ -1,29 +1,27 @@
 package handler
 
 import (
-	"context"
-	"encoding/json"
-	"golang-error/internal/service"
+	"log/slog"
 	"net/http"
 )
 
-type UserHandler struct {
-	service *service.UserService
-}
+func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Query().Get("username")
+	logger := r.Context().Value("logger").(*slog.Logger)
 
-func NewUserHandler(s *service.UserService) *UserHandler {
-	return &UserHandler{service: s}
-}
+	if len(username) == 0 {
+		WriteJson(w, http.StatusBadRequest, "Bad Request")
+		return
+	}
 
-func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Query().Get("id")
+	user, err := h.services.GetUserByUsername(r.Context(), username)
 
-	user, err := h.service.GetByUsername(context.Background(), username)
 	if err != nil {
+		logger.Error("failed to get user", "error", err)
+
 		WriteErrorResponse(w, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	WriteJson(w, http.StatusOK, user)
 }

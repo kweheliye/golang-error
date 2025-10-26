@@ -8,27 +8,24 @@ import (
 )
 
 type ApiError struct {
-	Status  int
-	Message string
+	Status  int    `json:"status_code"`
+	Message string `json:"message"`
 }
 
 func FromError(err error) ApiError {
-	var svcError *service.ServiceError
+	var serviceError *service.ServiceError
 	apiError := ApiError{
 		Status:  http.StatusInternalServerError, // default
 		Message: "internal server error",        // default
 	}
-	if errors.As(err, &svcError) {
-		svcErr := svcError.SVCError() // the underlying error
+
+	if errors.As(err, &serviceError) {
+		svcErr := serviceError.SvcErr()
 		apiError.Message = svcErr.Error()
 
 		switch {
-		case errors.Is(svcErr, service.ErrBadRequest):
-			apiError.Status = http.StatusBadRequest
-		case errors.Is(svcErr, service.ErrInternalFailure):
-			apiError.Status = http.StatusInternalServerError
 		case errors.Is(svcErr, service.ErrNotFound):
-			apiError.Status = http.StatusNotFound
+			apiError.Status = http.StatusBadRequest
 		}
 	}
 	return apiError

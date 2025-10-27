@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-	cfg, err := util.LoadConfig("../")
+	cfg, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -35,7 +35,7 @@ func main() {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("cannot ping db: %v", err)
 	}
-	
+
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {

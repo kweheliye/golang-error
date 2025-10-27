@@ -7,6 +7,6 @@ import (
 )
 
 type Store interface {
-	GetByUserName(ctx context.Context, username string) (*model.User, error)
+	GetByUserName(ctx context.Context, tx *sql.Tx, username string) (*model.User, error)
 	ExecTx(ctx context.Context, fn func(tx *sql.Tx) error) error
 }

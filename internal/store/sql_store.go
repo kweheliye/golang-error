@@ -22,13 +22,13 @@ func NewSQLStore(db *sql.DB) *SQLStore {
 	}
 }
 
-func (s *SQLStore) GetByUserName(ctx context.Context, username string) (*model.User, error) {
+func (s *SQLStore) GetByUserName(ctx context.Context, tx *sql.Tx, username string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()
 
 	user := &model.User{}
 
-	err := s.db.QueryRowContext(ctx, "SELECT username, email FROM users WHERE username=$1", username).
+	err := tx.QueryRowContext(ctx, "SELECT username, email FROM users WHERE username=$1", username).
 		Scan(
 			&user.Username,
 			&user.Email,

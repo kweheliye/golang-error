@@ -19,7 +19,7 @@ func (u *Service) GetUserByUsername(ctx context.Context, username string) (*mode
 	var user *model.User
 	err := u.store.ExecTx(ctx, func(tx *sql.Tx) error {
 		var err error
-		user, err = u.store.GetByUserName(ctx, username)
+		user, err = u.store.GetByUserName(ctx, tx, username)
 		return err
 	})
 
